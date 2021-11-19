@@ -224,4 +224,4 @@ class BitmexClinet():
         try:
             self._ws.send(json.dumps(data))
         except Exception as e:
-            logger.error("Websocket error while subscribing to %s: %s", topic, e)
+            logger.error("A websocket error while subscribing to %s: %s", topic, e)
