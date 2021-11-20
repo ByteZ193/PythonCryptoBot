@@ -44,6 +44,7 @@ if __name__ == '__main__':
     #print(bitmex.cancel_order("8212f0d1-21df-4d8d-9059-2ecbb09f32a6").status)
     #bitmex.get_historical_cadles(bitmex.contracts['XBTUSD'], "1h")
 
+    #Hola desde PyCharm
 
 
     root = tk.Tk()
