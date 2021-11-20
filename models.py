@@ -1,4 +1,8 @@
+import dateutil.parser
+import datetime
+
 BITMEX_MULTIPLIER = 0.00000001
+BITMEX_TF_MINUTES = {"1m": 1, "5m": 5, "1h": 60, "1d": 1440}
 
 class Balance:
     def __init__(self, info, exchange):
@@ -9,7 +13,7 @@ class Balance:
             self.wallet_balance = float(info['walletBalance']) * BITMEX_MULTIPLIER
             self.unrealized_pnl = float(info['unrealizedProfit']) * BITMEX_MULTIPLIER
 
-        if exchange == "bitmex":
+        elif exchange == "bitmex":
             self.initial_margin = info['initMargin']
             self.maintenance_margin = info['maintMargin']
             self.margin_balance = info['marginBalance']
@@ -17,7 +21,7 @@ class Balance:
             self.unrealized_pnl = info['unrealisedPnl']
 
 class Candle:
-    def __init__(self, candle_info, exchange):
+    def __init__(self, candle_info, timeframe, exchange):
         if exchange == "binance":
             self.timestamp = candle_info[0]
             self.open = float(candle_info[1])
@@ -26,8 +30,11 @@ class Candle:
             self.close = float(candle_info[4])
             self.volume = float(candle_info[5])
 
-        if exchange == "bitmex":
-            self.timestamp = candle_info['timestamp']
+        elif exchange == "bitmex":
+            self.timestamp = dateutil.parser.isoparse(candle_info['timestamp'])
+            self.timestamp = self.timestamp - datetime.timedelta(minutes=BITMEX_TF_MINUTES[timeframe])
+            print(self.timestamp)
+            self.timestamp = int(self.timestamp.timestamp() * 1000)
             self.open = candle_info['open']
             self.high = candle_info['high']
             self.low = candle_info['low']
@@ -42,13 +49,15 @@ class Contract:
             self.quote_asset = contract_info['quoteAsset']
             self.price_decimals = contract_info['pricePrecision']
             self.quantity_decimals = contract_info['quantityPrecision']
+            self.tick_size = 1 / pow(10, contract_info['pricePrecision'])
+            self.lot_size = 1 / pow(10, contract_info['quantityPrecision'])
 
-        if exchange == "bitmex":
+        elif exchange == "bitmex":
             self.symbol = contract_info['symbol']
             self.base_assets = contract_info['rootSymbol']
             self.quote_asset = contract_info['quoteCurrency']
-            self.price_decimals = contract_info['tickSize']
-            self.quantity_decimals = contract_info['lotSize']
+            self.tick_size = contract_info['tickSize']
+            self.lot_size = contract_info['lotSize']
 
 
 class OrderStatus:
@@ -58,7 +67,7 @@ class OrderStatus:
             self.status = order_info['status']
             self.avg_price = float(order_info['avgPrice'])
 
-        if exchange == "bitmex":
+        elif exchange == "bitmex":
             self.order_id = order_info['orderID']
             self.status = order_info['ordStatus']
             self.avg_price = order_info['avgPx']

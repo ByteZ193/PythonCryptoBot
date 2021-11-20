@@ -114,6 +114,7 @@ class BitmexClinet():
         data['partial'] = True
         data['binSize'] = timeframe
         data['count'] = 500
+        data['reverse'] = True
 
         raw_candles = self._make_requests("GET", "/api/v1/trade/bucketed", data)
 
@@ -121,7 +122,7 @@ class BitmexClinet():
 
         if raw_candles is not None:
             for c in raw_candles:
-                candles.append(Candle(c, "bitmex"))
+                candles.append(Candle(c, timeframe, "bitmex"))
 
         return candles
 
@@ -213,7 +214,7 @@ class BitmexClinet():
                     if 'askPrice' in d:
                         self.prices[symbol]['ask'] = d['askPrice']
 
-                    print(symbol, self.prices[symbol])
+                    #print(symbol, self.prices[symbol])
 
     def subscribe_channel(self, topic: str):
         data = dict()
