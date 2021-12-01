@@ -4,6 +4,7 @@ from tkinter import font
 from tkinter.constants import EW, PIESLICE
 from conectors.binance_futures import BinanceFuturesClinet
 from conectors.bitmex import BitmexClinet
+from interface.root_component import Root
 
 logger = logging.getLogger()
 
@@ -43,7 +44,8 @@ if __name__ == '__main__':
     #print(bitmex.get_order_status("8212f0d1-21df-4d8d-9059-2ecbb09f32a6", bitmex.contracts['XBTUSD']).status)
     #print(bitmex.cancel_order("8212f0d1-21df-4d8d-9059-2ecbb09f32a6").status)
     #bitmex.get_historical_cadles(bitmex.contracts['XBTUSD'], "1h")
+    #print(bitmex.place_order(bitmex.contracts['XBTUSD'], "Limit", 100, "Buy", 20000.3987667, "GoodTillCancel"))
 
 
-    root = tk.Tk()
+    root = Root()
     root.mainloop()

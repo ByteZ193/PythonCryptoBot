@@ -41,6 +41,18 @@ class Candle:
             self.close = candle_info['close']
             self.volume = candle_info['volume']
 
+def tick_to_decimals(tick_size: float) -> int:
+    tick_size_str = "{0:.8f}".format(tick_size)
+    while tick_size_str[-1] == "0":
+        tick_size_str = tick_size_str[:-1]
+
+    split_tick = tick_size_str.split(".")
+
+    if len(split_tick) > 1:
+        return len(split_tick[1])
+    else:
+        return 0
+
 class Contract:
     def __init__(self, contract_info, exchange):
         if exchange == "binance":
@@ -56,6 +68,8 @@ class Contract:
             self.symbol = contract_info['symbol']
             self.base_assets = contract_info['rootSymbol']
             self.quote_asset = contract_info['quoteCurrency']
+            self.price_decimals = tick_to_decimals(contract_info['tickSize'])
+            self.quantity_decimals = tick_to_decimals(contract_info['lotSize'])
             self.tick_size = contract_info['tickSize']
             self.lot_size = contract_info['lotSize']
 
