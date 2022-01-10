@@ -1,5 +1,6 @@
 import tkinter as tk
 from interface.styling import *
+from interface.logging_component import Logging
 
 
 class Root(tk.Tk):
@@ -9,8 +10,11 @@ class Root(tk.Tk):
 
         self.configure(bg=BG_COLOR)
 
-        self.left_frame = tk.Frame(self, bg=BG_COLOR)
-        self.left_frame.pack(side=tk.LEFT)
+        self._left_frame = tk.Frame(self, bg=BG_COLOR)
+        self._left_frame.pack(side=tk.LEFT)
 
-        self.right_frame = tk.Frame(self, bg=BG_COLOR)
-        self.right_frame.pack(side=tk.RIGHT)
+        self._right_frame = tk.Frame(self, bg=BG_COLOR)
+        self._right_frame.pack(side=tk.RIGHT)
+
+        self._logging_frame = Logging(self.left_frame, bg=BG_COLOR)
+        self._logging_frame.pack(site=tk.TOP)

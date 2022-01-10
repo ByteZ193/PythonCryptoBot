@@ -40,7 +40,6 @@ if __name__ == '__main__':
 
     bitmex = BitmexClinet("JVI8VsHv6vt3fIN9BGI1J3WR", "qV8DIZv1CtZQWngAaNtB8WfWEdDfvyB-XWbz7g99lPj1h0H4", True)
 
-    #print(bitmex.place_order(bitmex.contracts['XBTUSD'], "Limit", 100, 'Buy', price=20000, tif='GoodTillCancel').order_id)
     #print(bitmex.get_order_status("8212f0d1-21df-4d8d-9059-2ecbb09f32a6", bitmex.contracts['XBTUSD']).status)
     #print(bitmex.cancel_order("8212f0d1-21df-4d8d-9059-2ecbb09f32a6").status)
     #bitmex.get_historical_cadles(bitmex.contracts['XBTUSD'], "1h")
