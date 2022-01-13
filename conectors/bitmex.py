@@ -34,6 +34,7 @@ class BitmexClinet():
         self.prices = dict()
 
         t = threading.Thread(target=self._start_ws)
+        t.daemon = True
         t.start()
 
         logger.info("Bitmex Client successfully initialized")

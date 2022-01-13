@@ -16,5 +16,7 @@ class Root(tk.Tk):
         self._right_frame = tk.Frame(self, bg=BG_COLOR)
         self._right_frame.pack(side=tk.RIGHT)
 
-        self._logging_frame = Logging(self.left_frame, bg=BG_COLOR)
-        self._logging_frame.pack(site=tk.TOP)
+        self._logging_frame = Logging(self._left_frame, bg=BG_COLOR)
+        self._logging_frame.pack(side=tk.TOP)
+
+        self._logging_frame.add_log("This is a test message")
