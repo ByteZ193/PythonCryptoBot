@@ -14,7 +14,7 @@ import typing
 logger = logging.getLogger()
 
 
-class BinanceFuturesClinet:
+class BinanceFuturesClient:
     def __init__(self, public_key: str, secret_key: str, tesnet: bool):
         if tesnet:
             self._base_url = "https://testnet.binancefuture.com"
@@ -33,6 +33,8 @@ class BinanceFuturesClinet:
 
         self.prices = dict()
 
+        self.logs = []
+
         self._ws_id = 1
         self._ws = None
 
@@ -41,6 +43,10 @@ class BinanceFuturesClinet:
         t.start()
 
         logger.info("Binance Futures Client succesfully initialized")
+
+    def _add_log(self, msg: str):
+        logger.info("%s", msg)
+        self.logs.append({"log": msg, "displayed": False})
 
     def _generate_signature(self, data: typing.Dict) -> str:
         return hmac.new(self._secret_key.encode(), urlencode(data).encode(), hashlib.sha256).hexdigest()
