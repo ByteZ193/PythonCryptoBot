@@ -42,7 +42,7 @@ class BinanceFuturesClient:
         t.daemon = True
         t.start()
 
-        logger.info("Binance Futures Client succesfully initialized")
+        logger.info("Binance Futures Client successfully initialized")
 
     def _add_log(self, msg: str):
         logger.info("%s", msg)
