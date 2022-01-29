@@ -72,7 +72,8 @@ class StrategyEditor(tk.Frame):
             elif base_param['widget'] == tk.Button:
                 self.body_widgets[code_name][b_index] = tk.Button(self._table_frame, text=base_param['text'],
                                                                   bg=base_param['bg'], fg=FG_COLOR,
-                                                                  command=lambda:base_param['command'](b_index))
+                                                                  command=lambda frozen_command=base_param['command']:
+                                                                  frozen_command(b_index))
 
             else:
                 continue
@@ -88,4 +89,7 @@ class StrategyEditor(tk.Frame):
         return
 
     def _delete_row(self, b_index: int):
-        return
+        for element in self._base_params:
+            self.body_widgets[element['code_name']][b_index].grid_forget()
+
+            del self.body_widgets[element['code_name']][b_index]
