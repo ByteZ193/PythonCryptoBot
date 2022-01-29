@@ -7,7 +7,7 @@ from interface.styling import *
 
 
 class Watchlist(tk.Frame):
-    def __init__(self, binance_contracts: typing.Dict[str, Contract], bitmex_contracts: typing.Dict[str, Contract],*args,
+    def __init__(self, binance_contracts: typing.Dict[str, Contract], bitmex_contracts: typing.Dict[str, Contract], *args,
                  **kwargs):
         super().__init__(*args, **kwargs)
 
