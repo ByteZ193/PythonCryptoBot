@@ -3,13 +3,24 @@ import typing
 
 from interface.styling import *
 
+from conectors.binance_futures import BinanceFuturesClient
+from conectors.bitmex import BitmexClient
+from strategies import TechnicalStrategy, BreakoutStrategy
+
 
 class StrategyEditor(tk.Frame):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, root, binance: BinanceFuturesClient, bitmex: BitmexClient, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._all_contracts = ['BTCUSDT', 'ETHUSDT']
+        self.root = root
+        self._exchanges = {"Binance": binance, "Bitmex": bitmex}
+
+        self._all_contracts = []
         self._all_timeframes = ["1m", "5m", "15m", "30m", "1h", "4h"]
+
+        for exchange, client in self._exchanges.items():
+            for symbol, contract in client.contracts.items():
+                self._all_contracts.append(symbol + "_" + exchange.capitalize())
 
         self._commands_frame = tk.Frame(self, bg=BG_COLOR)
         self._commands_frame.pack(side=tk.TOP)
@@ -24,6 +35,9 @@ class StrategyEditor(tk.Frame):
         self.body_widgets = dict()
 
         self._headers = ["Strategy", "Contract", "Timeframe", "Balance %", "TP %", "SL %"]
+
+        self._additional_parameters = dict()
+        self._extra_input = dict()
 
         self._base_params = [
             {"code_name": "strategy_type", "widget": tk.OptionMenu, "data_type": str, "values": ["Technical", "Breakout"],
@@ -45,12 +59,12 @@ class StrategyEditor(tk.Frame):
 
         self._extra_params = {
             "Technical": [
-                {"code_name": "ema_fast", "name": "MACD Fast Length", "widget": tk.Entry, "data": int},
-                {"code_name": "ema_slow", "name": "MACD Slow Length", "widget": tk.Entry, "data": int},
-                {"code_name": "ema_signal", "name": "MACD Signal Length", "widget": tk.Entry, "data": int}
+                {"code_name": "ema_fast", "name": "MACD Fast Length", "widget": tk.Entry, "data_type": int},
+                {"code_name": "ema_slow", "name": "MACD Slow Length", "widget": tk.Entry, "data_type": int},
+                {"code_name": "ema_signal", "name": "MACD Signal Length", "widget": tk.Entry, "data_type": int}
             ],
             "Breakout": [
-                {"code_name": "min_volume", "name": "Minimum Volume", "widget": tk.Entry, "data": float},
+                {"code_name": "min_volume", "name": "Minimum Volume", "widget": tk.Entry, "data_type": float},
             ]
         }
 
@@ -92,6 +106,12 @@ class StrategyEditor(tk.Frame):
 
             self.body_widgets[code_name][b_index].grid(row=b_index, column=col)
 
+        self._additional_parameters[b_index] = dict()
+
+        for strat, params in self._extra_params.items():
+            for param in params:
+                self._additional_parameters[b_index][param['code_name']] = None
+
         self._body_index += 1
 
     def _show_popup(self, b_index: int):
@@ -118,12 +138,14 @@ class StrategyEditor(tk.Frame):
             temp_label.grid(row=row_nb, column=0)
 
             if param['widget'] == tk.Entry:
-                temp_input = tk.Entry(self._popup_window, bg=BG_COLOR_2, justify=tk.CENTER, fg=FG_COLOR,
+                self._extra_input[code_name] = tk.Entry(self._popup_window, bg=BG_COLOR_2, justify=tk.CENTER, fg=FG_COLOR,
                                       insertbackground=FG_COLOR)
+                if self._additional_parameters[b_index][code_name] is not None:
+                    self._extra_input[code_name].insert(tk.END, str(self._additional_parameters[b_index][code_name]))
             else:
                 continue
 
-            temp_input.grid(row=row_nb, column=1)
+            self._extra_input[code_name].grid(row=row_nb, column=1)
 
             row_nb += 1
 
@@ -134,10 +156,72 @@ class StrategyEditor(tk.Frame):
         validation_button.grid(row=row_nb, column=0, columnspan=2)
 
     def _validate_parameters(self, b_index: int):
-        return
+
+        strat_selected = self.body_widgets['strategy_type_var'][b_index].get()
+
+        for param in self._extra_params[strat_selected]:
+            code_name = param['code_name']
+
+            if self._extra_input[code_name].get() == "":
+                self._additional_parameters[b_index][code_name] = None
+            else:
+                self._additional_parameters[b_index][code_name] = param['data_type'](self._extra_input[code_name].get())
+
+        self._popup_window.destroy()
 
     def _switch_strategy(self, b_index: int):
-        return
+
+        for param in ["balance_pct", "take_profit", "stop_loss"]:
+            if self.body_widgets[param][b_index].get() == "":
+                self.root.logging_frame.add_log(f"Missing {param} parameter")
+                return
+
+        strat_selected = self.body_widgets['strategy_type_var'][b_index].get()
+
+        for param in self._extra_params[strat_selected]:
+            if self._additional_parameters[b_index][param['code_name']] is None:
+                self.root.logging_frame.add_log(f"Missing {param['code_name']} parameter")
+                return
+
+        symbol = self.body_widgets['contract_var'][b_index].get().split("_")[0]
+        timeframe = self.body_widgets['timeframe_var'][b_index].get()
+        exchange = self.body_widgets['contract_var'][b_index].get().split("_")[1]
+
+        contract = self._exchanges[exchange].contracts[symbol]
+
+        balance_pct = float(self.body_widgets['balance_pct'][b_index].get())
+        take_profit = float(self.body_widgets['take_profit'][b_index].get())
+        stop_loss = float(self.body_widgets['stop_loss'][b_index].get())
+
+        if self.body_widgets['activation'][b_index].cget("text") == "OFF":
+
+            if strat_selected == "Technical":
+                new_strategy = TechnicalStrategy(contract, exchange, timeframe, balance_pct, take_profit, stop_loss,
+                                                 self._additional_parameters[b_index])
+            elif strat_selected == "Breakout":
+                new_strategy = BreakoutStrategy(contract, exchange, timeframe, balance_pct, take_profit, stop_loss,
+                                                self._additional_parameters[b_index])
+            else:
+                return
+
+            for param in self._base_params:
+                code_name = param['code_name']
+
+                if code_name != "activation" and "_var" not in code_name:
+                    self.body_widgets[code_name][b_index].config(state=tk.DISABLED)
+
+            self.body_widgets['activation'][b_index].config(bg="darkgreen", text="ON")
+            self.root.logging_frame.add_log(f"{strat_selected} strategy on {symbol} / {timeframe} started")
+
+        else:
+            for param in self._base_params:
+                code_name = param['code_name']
+
+                if code_name != "activation" and "_var" not in code_name:
+                    self.body_widgets[code_name][b_index].config(state=tk.NORMAL)
+
+            self.body_widgets['activation'][b_index].config(bg="darkred", text="OFF")
+            self.root.logging_frame.add_log(f"{strat_selected} strategy on {symbol} / {timeframe} stopped")
 
     def _delete_row(self, b_index: int):
         for element in self._base_params:
