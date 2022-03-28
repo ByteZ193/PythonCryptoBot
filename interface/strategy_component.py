@@ -204,6 +204,14 @@ class StrategyEditor(tk.Frame):
             else:
                 return
 
+            new_strategy.candles = self._exchanges[exchange].get_historical_candles(contract, timeframe)
+
+            if len(new_strategy.candles) == 0:
+                self.root.logging_frame.add_log(f"No historical data retrieved for {contract.symbol}")
+                return
+
+            self._exchanges[exchange].strategies[b_index] = new_strategy
+
             for param in self._base_params:
                 code_name = param['code_name']
 
@@ -214,6 +222,8 @@ class StrategyEditor(tk.Frame):
             self.root.logging_frame.add_log(f"{strat_selected} strategy on {symbol} / {timeframe} started")
 
         else:
+            del self._exchanges[exchange].strategies[b_index]
+
             for param in self._base_params:
                 code_name = param['code_name']
 

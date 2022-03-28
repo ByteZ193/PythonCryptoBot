@@ -9,6 +9,7 @@ import websocket
 import json
 import threading
 from models import *
+import dateutil.parser
 
 logger = logging.getLogger()
 
@@ -194,6 +195,7 @@ class BitmexClient:
     def _on_open(self, ws):
         logger.info("Bitmex connection opened")
         self.subscribe_channel("instrument")
+        self.subscribe_channel("trade")
 
     def _on_close(self, ws):
         logger.warning("Bitmex Websocket connection closed")
@@ -221,9 +223,13 @@ class BitmexClient:
                     if 'askPrice' in d:
                         self.prices[symbol]['ask'] = d['askPrice']
 
-                    # if symbol == "XBTUSD":
-                        # self._add_log(symbol + " " + str(self.prices[symbol]['bid']) + " / " + str(self.prices[
-                                                                                                      # symbol]['ask']))
+            if data['table'] == "trade":
+
+                for d in data['data']:
+
+                    symbol = d['symbol']
+
+                    ts = int(dateutil.parser.isoparse(d['timestamp']).timestamp() * 1000)
 
     def subscribe_channel(self, topic: str):
         data = dict()

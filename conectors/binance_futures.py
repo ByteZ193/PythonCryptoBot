@@ -10,6 +10,7 @@ import threading
 import json
 from models import *
 import typing
+from strategies import TechnicalStrategy, BreakoutStrategy
 
 logger = logging.getLogger()
 
@@ -32,6 +33,7 @@ class BinanceFuturesClient:
         self.balances = self.get_balances()
 
         self.prices = dict()
+        self.strategies: typing.Dict[int, typing.Union[TechnicalStrategy, BreakoutStrategy]] = dict()
 
         self.logs = []
 
@@ -204,6 +206,7 @@ class BinanceFuturesClient:
     def _on_open(self, ws):
         logger.info("Binance connection opened")
         self.subscribe_channel(list(self.contracts.values()), "bookTicker")
+        self.subscribe_channel(list(self.contracts.values()), "aggTrade")
 
     def _on_close(self, ws):
         logger.warning("Binance Websocket connection closed")
@@ -226,7 +229,9 @@ class BinanceFuturesClient:
                     self.prices[symbol]['bid'] = float(data['b'])
                     self.prices[symbol]['ask'] = float(data['a'])
 
-                # print(self.prices[symbol])
+            elif data['e'] == "aggTrade":
+
+                symbol = data['s']
 
     def subscribe_channel(self, contracts: typing.List[Contract], channel: str):
         data = dict()
