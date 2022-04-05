@@ -41,6 +41,15 @@ class Candle:
             self.close = candle_info['close']
             self.volume = candle_info['volume']
 
+        elif exchange == "parse_trade":
+            self.timestamp = candle_info['ts']
+            self.open = candle_info['open']
+            self.high = candle_info['high']
+            self.low = candle_info['low']
+            self.close = candle_info['close']
+            self.volume = candle_info['volume']
+
+
 def tick_to_decimals(tick_size: float) -> int:
     tick_size_str = "{0:.8f}".format(tick_size)
     while tick_size_str[-1] == "0":
@@ -52,6 +61,7 @@ def tick_to_decimals(tick_size: float) -> int:
         return len(split_tick[1])
     else:
         return 0
+
 
 class Contract:
     def __init__(self, contract_info, exchange):

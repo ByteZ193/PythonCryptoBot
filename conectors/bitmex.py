@@ -10,7 +10,7 @@ import json
 import threading
 from models import *
 import dateutil.parser
-
+from strategies import TechnicalStrategy, BreakoutStrategy
 logger = logging.getLogger()
 
 
@@ -33,6 +33,7 @@ class BitmexClient:
         self.balance = self.get_balances()
 
         self.prices = dict()
+        self.strategies: typing.Dict[int, typing.Union[TechnicalStrategy, BreakoutStrategy]] = dict()
 
         self.logs = []
 
@@ -230,6 +231,10 @@ class BitmexClient:
                     symbol = d['symbol']
 
                     ts = int(dateutil.parser.isoparse(d['timestamp']).timestamp() * 1000)
+
+                    for key, strat in self.strategies.items():
+                        if strat.contract.symbol == symbol:
+                            strat.parse_trades(float(d['prices']), float(d['size']), ts)
 
     def subscribe_channel(self, topic: str):
         data = dict()
