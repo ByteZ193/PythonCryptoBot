@@ -99,3 +99,12 @@ class BreakoutStrategy(Strategy):
         super().__init__(contract, exchange, timeframe, balance_pct, take_profit, stop_loss)
 
         self._min_volume = other_params['min_volume']
+
+    def _check_signal(self) -> int:
+
+        if self.candles[-1].close > self.candles[-2].high and self.candles[-1].volume > self._min_volume:
+            return 1
+        elif self.candles[-1].close < self.candles[-2].low and self.candles[-1].volume > self._min_volume:
+            return -1
+        else:
+            return 0
