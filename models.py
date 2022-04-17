@@ -4,6 +4,7 @@ import datetime
 BITMEX_MULTIPLIER = 0.00000001
 BITMEX_TF_MINUTES = {"1m": 1, "5m": 5, "1h": 60, "1d": 1440}
 
+
 class Balance:
     def __init__(self, info, exchange):
         if exchange == "binance":
@@ -19,6 +20,7 @@ class Balance:
             self.margin_balance = info['marginBalance']
             self.wallet_balance = info['walletBalance']
             self.unrealized_pnl = info['unrealisedPnl']
+
 
 class Candle:
     def __init__(self, candle_info, timeframe, exchange):
@@ -82,6 +84,14 @@ class Contract:
             self.quantity_decimals = tick_to_decimals(contract_info['lotSize'])
             self.tick_size = contract_info['tickSize']
             self.lot_size = contract_info['lotSize']
+
+            self.quanto = contract_info['isQuanto']
+            self.inverse = contract_info['isInverse']
+
+            self.multiplier = contract_info['multiplier'] * BITMEX_MULTIPLIER
+
+            if self.inverse:
+                self.multiplier *= -1
 
 
 class OrderStatus:
