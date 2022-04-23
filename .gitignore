@@ -1,6 +1,5 @@
 info.log
 __pycache__
-.ideal
-.vscode
-.conectors\__pycache__
-.intersectors\__pycache__
+.idea
+conectors/__pycache__
+interface/__pycache__
