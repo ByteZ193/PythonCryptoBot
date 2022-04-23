@@ -3,3 +3,4 @@ __pycache__
 .idea
 conectors/__pycache__
 interface/__pycache__
+keys.txt
