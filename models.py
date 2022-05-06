@@ -8,18 +8,18 @@ BITMEX_TF_MINUTES = {"1m": 1, "5m": 5, "1h": 60, "1d": 1440}
 class Balance:
     def __init__(self, info, exchange):
         if exchange == "binance":
-            self.initial_margin = float(info['initialMargin']) * BITMEX_MULTIPLIER
-            self.maintenance_margin = float(info['maintMargin']) * BITMEX_MULTIPLIER
-            self.margin_balance = float(info['marginBalance']) * BITMEX_MULTIPLIER
-            self.wallet_balance = float(info['walletBalance']) * BITMEX_MULTIPLIER
-            self.unrealized_pnl = float(info['unrealizedProfit']) * BITMEX_MULTIPLIER
+            self.initial_margin = float(info['initialMargin'])
+            self.maintenance_margin = float(info['maintMargin'])
+            self.margin_balance = float(info['marginBalance'])
+            self.wallet_balance = float(info['walletBalance'])
+            self.unrealized_pnl = float(info['unrealizedProfit'])
 
         elif exchange == "bitmex":
-            self.initial_margin = info['initMargin']
-            self.maintenance_margin = info['maintMargin']
-            self.margin_balance = info['marginBalance']
-            self.wallet_balance = info['walletBalance']
-            self.unrealized_pnl = info['unrealisedPnl']
+            self.initial_margin = info['initMargin'] * BITMEX_MULTIPLIER
+            self.maintenance_margin = info['maintMargin'] * BITMEX_MULTIPLIER
+            self.margin_balance = info['marginBalance'] * BITMEX_MULTIPLIER
+            self.wallet_balance = info['walletBalance'] * BITMEX_MULTIPLIER
+            self.unrealized_pnl = info['unrealisedPnl'] * BITMEX_MULTIPLIER
 
 
 class Candle:
@@ -98,10 +98,21 @@ class OrderStatus:
     def __init__(self, order_info, exchange):
         if exchange == "binance":
             self.order_id = order_info['orderId']
-            self.status = order_info['status']
+            self.status = order_info['status'].lower()
             self.avg_price = float(order_info['avgPrice'])
-
         elif exchange == "bitmex":
             self.order_id = order_info['orderID']
-            self.status = order_info['ordStatus']
+            self.status = order_info['ordStatus'].lower()
             self.avg_price = order_info['avgPx']
+
+class Trade:
+    def __init__(self, trade_info):
+        self.time: int = trade_info['time']
+        self.contract: Contract = trade_info['contract']
+        self.strategy: str = trade_info['strategy']
+        self.side: str = trade_info['side']
+        self.entry_price: float = trade_info['entry_price']
+        self.status: str = trade_info['status']
+        self.pnl: float = trade_info['pnl']
+        self.quantity = trade_info['quantity']
+        self.entry_id = trade_info['entry_id']

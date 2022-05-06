@@ -115,7 +115,7 @@ class BitmexClient:
 
         return balance
 
-    def get_historical_cadles(self, contract: Contract, timeframe: str) -> typing.List[Candle]:
+    def get_historical_candles(self, contract: Contract, timeframe: str) -> typing.List[Candle]:
 
         data = dict()
 
@@ -169,7 +169,7 @@ class BitmexClient:
 
         return order_status
 
-    def get_order_status(self, order_id: str, contract: Contract) -> OrderStatus:
+    def get_order_status(self, contract: Contract, order_id: str) -> OrderStatus:
         data = dict()
 
         data['symbol'] = contract.symbol

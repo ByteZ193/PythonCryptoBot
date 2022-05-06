@@ -139,16 +139,17 @@ class BinanceFuturesClient:
         # print(balances['USDT'].wallet_balance)
         return balances
 
-    def place_order(self, contract: Contract, side: str, quantity: float, order_type: str, price=None,
+    def place_order(self, contract: Contract, order_type: str, quantity: float,  side: str, price=None,
                     tif=None) -> OrderStatus:
         data = dict()
         data['symbol'] = contract.symbol
-        data['side'] = side
+        data['side'] = side.upper()
         data['quantity'] = round(round(quantity / contract.lot_size) * contract.lot_size, 8)
         data['type'] = order_type
 
         if price is not None:
             data['price'] = round(round(price / contract.tick_size) * contract.tick_size, 8)
+            data['price'] = '%.*f' % (contract.price_decimals, data['price'])
 
         if tif is not None:
             data['timeInForce'] = tif
@@ -182,8 +183,8 @@ class BinanceFuturesClient:
         data = dict()
         data['timestamp'] = int(time.time() * 1000)
         data['symbol'] = contract.symbol
-        data['order_id'] = order_id
-        data['signature'] = self.generate_signature(data)
+        data['orderId'] = order_id
+        data['signature'] = self._generate_signature(data)
 
         order_status = self._make_requests("GET", "/fapi/v1/order", data)
 
@@ -229,7 +230,7 @@ class BinanceFuturesClient:
                     self.prices[symbol]['bid'] = float(data['b'])
                     self.prices[symbol]['ask'] = float(data['a'])
 
-            elif data['e'] == "aggTrade":
+            if data['e'] == "aggTrade":
 
                 symbol = data['s']
 
@@ -266,7 +267,7 @@ class BinanceFuturesClient:
 
         trade_size = (balance * balance_pct / 100) / price
 
-        trade_size = round(round(trade_size / contract.lot_size) * contract.lot_size, 8)
+        trade_size = round(round(trade_size / contract.lot_size) * contract.lot_size, 4)
 
         logger.info("Binance Futures current USDT balance = %s, trade size = %s", balance, trade_size)
 
