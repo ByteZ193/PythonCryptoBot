@@ -267,7 +267,7 @@ class BinanceFuturesClient:
 
         trade_size = (balance * balance_pct / 100) / price
 
-        trade_size = round(round(trade_size / contract.lot_size) * contract.lot_size, 4)
+        trade_size = round(round(trade_size / contract.lot_size) * contract.lot_size, 8)
 
         logger.info("Binance Futures current USDT balance = %s, trade size = %s", balance, trade_size)
 
