@@ -1,3 +1,4 @@
+from audioop import mul
 import logging
 import requests
 import time
@@ -223,6 +224,34 @@ class BitmexClient:
 
                     if 'askPrice' in d:
                         self.prices[symbol]['ask'] = d['askPrice']
+                    
+                    # PNL Calculation
+
+                    try:
+                        for b_index, strat in self.strategies.items():
+                            if strat.contract.symbol == symbol:
+                                for trade in strat.trades:
+                                    if trade.status == "open" and trade.entry_price is not None:
+
+                                        if trade.side == "long":
+                                            price = self.prices[symbol]['bid']
+                                        else:
+                                            price = self.prices[symbol]['ask']
+                                        multiplier = trade.contract.multiplier
+
+                                        if trade.contract.inverse:
+                                            if trade.side == "long":
+                                                trade.pnl = (1 / trade.entry_price - 1 / price) * multiplier * trade.quantity
+                                            elif trade.side == "short":
+                                                trade.pnl = (1 / price - 1 / trade.entry_price) * multiplier * trade.quantity
+                                        else:
+                                            if trade.side == "long":
+                                                trade.pnl = (price - trade.entry_price) * multiplier * trade.quantity
+                                            elif trade.side == "short":
+                                                trade.pnl = (trade.entry_price - price) * multiplier * trade.quantity
+
+                    except RuntimeError as e:
+                        logger.error("Error while looping through the Bitmex strategies: $s", e)
 
             if data['table'] == "trade":
 
@@ -234,7 +263,7 @@ class BitmexClient:
 
                     for key, strat in self.strategies.items():
                         if strat.contract.symbol == symbol:
-                            res = strat.parse_trades(float(d['prices']), float(d['size']), ts)
+                            res = strat.parse_trades(float(d['price']), float(d['size']), ts)
                             strat.check_trade(res)
 
     def subscribe_channel(self, topic: str):

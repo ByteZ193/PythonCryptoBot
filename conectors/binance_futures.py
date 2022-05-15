@@ -230,6 +230,22 @@ class BinanceFuturesClient:
                     self.prices[symbol]['bid'] = float(data['b'])
                     self.prices[symbol]['ask'] = float(data['a'])
 
+                # PNL Calculation
+
+                try:
+                    for b_index, strat in self.strategies.items():
+                        if strat.contract.symbol == symbol:
+                            for trade in strat.trades:
+                                if trade.status == "open" and trade.entry_price is not None:
+                                    if trade.side == "long":
+                                        trade.pnl = (self.prices[symbol]['bid'] - trade.entry_price) * trade.quantity
+                                    elif trade.side == "short":
+                                        trade.pnl = (trade.entry_price - self.prices[symbol]['ask']) * trade.quantity
+
+                except RuntimeError as e:
+                    logger.error("Error while looping through the Binance strategies: $s", e)
+
+
             if data['e'] == "aggTrade":
 
                 symbol = data['s']
