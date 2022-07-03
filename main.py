@@ -5,6 +5,7 @@ from tkinter.constants import EW, PIESLICE
 from conectors.binance_futures import BinanceFuturesClient
 from conectors.bitmex import BitmexClient
 from interface.root_component import Root
+from keys import binance_public_key, binance_secret_key, bitmex_public_key, bitmex_secret_key
 
 logger = logging.getLogger()
 
@@ -32,14 +33,13 @@ logger.error("This message helps to debugan error that occurred in your program"
 
 if __name__ == '__main__':
 
-    binance = BinanceFuturesClient("6558cee30361def71f9d7ae147870a0e6cec98f7bca52fbaf360d5481ab63580",
-                                   "0889dfba638f3b2a314d1bc320954be8b46f4078a83a3ad2ded09bdc58290704", True)
+    binance = BinanceFuturesClient(binance_public_key, binance_secret_key, True)
     # print(binance.get_balances())
     # print(binance.place_order("BTCUSDT", "BUY", 0.01, "LIMIT", 20000, "GTC"))
     # print(binance.get_order_status("BTCUSDT", 2728938950))
     # print(binance.cancel_order("BTCUSDT", 2729677482))
 
-    bitmex = BitmexClient("JVI8VsHv6vt3fIN9BGI1J3WR", "qV8DIZv1CtZQWngAaNtB8WfWEdDfvyB-XWbz7g99lPj1h0H4", True)
+    bitmex = BitmexClient(bitmex_public_key, bitmex_secret_key, True)
 
     # print(bitmex.get_order_status("8212f0d1-21df-4d8d-9059-2ecbb09f32a6", bitmex.contracts['XBTUSD']).status)
     # print(bitmex.cancel_order("8212f0d1-21df-4d8d-9059-2ecbb09f32a6").status)

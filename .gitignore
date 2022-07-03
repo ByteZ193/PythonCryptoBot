@@ -4,3 +4,4 @@ __pycache__
 conectors/__pycache__
 interface/__pycache__
 keys.txt
+keys.py
