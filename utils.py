@@ -13,7 +13,6 @@ def check_interger_format(text: str):
         return False
 
 def check_float_format(text: str):
-    print(text)
     if text == "":
         return True
     
