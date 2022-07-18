@@ -1,11 +1,13 @@
 import tkinter as tk
 import typing
+from wsgiref import validate
 
 from interface.styling import *
 
 from conectors.binance_futures import BinanceFuturesClient
 from conectors.bitmex import BitmexClient
 from strategies import TechnicalStrategy, BreakoutStrategy
+from utils import *
 
 
 class StrategyEditor(tk.Frame):
@@ -13,6 +15,10 @@ class StrategyEditor(tk.Frame):
         super().__init__(*args, **kwargs)
 
         self.root = root
+
+        self._valid_interger = self.register(check_interger_format)
+        self._valid_float = self.register(check_float_format)
+
         self._exchanges = {"Binance": binance, "Bitmex": bitmex}
 
         self._all_contracts = []
@@ -88,19 +94,19 @@ class StrategyEditor(tk.Frame):
             if base_param['widget'] == tk.OptionMenu:
                 self.body_widgets[code_name + "_var"][b_index] = tk.StringVar()
                 self.body_widgets[code_name + "_var"][b_index].set(base_param['values'][0])
-                self.body_widgets[code_name][b_index] = tk.OptionMenu(self._table_frame, self.body_widgets[code_name +
-                                                                                                           "_var"][b_index],
-                                                                      *base_param['values'])
+                self.body_widgets[code_name][b_index] = tk.OptionMenu(self._table_frame, self.body_widgets[code_name + "_var"][b_index], *base_param['values'])
                 self.body_widgets[code_name][b_index].config(width=base_param['width'])
 
             elif base_param['widget'] == tk.Entry:
                 self.body_widgets[code_name][b_index] = tk.Entry(self._table_frame, justify=tk.CENTER)
 
+                if base_param['data_type'] == int:
+                    self.body_widgets[code_name][b_index].config(validate='key', validatecommand=(self._valid_interger, "%P"))
+                elif base_param['data_type'] == float:
+                    self.body_widgets[code_name][b_index].config(validate='key', validatecommand=(self._valid_float, "%P"))
+
             elif base_param['widget'] == tk.Button:
-                self.body_widgets[code_name][b_index] = tk.Button(self._table_frame, text=base_param['text'],
-                                                                  bg=base_param['bg'], fg=FG_COLOR,
-                                                                  command=lambda frozen_command=base_param['command']:
-                                                                  frozen_command(b_index))
+                self.body_widgets[code_name][b_index] = tk.Button(self._table_frame, text=base_param['text'], bg=base_param['bg'], fg=FG_COLOR, command=lambda frozen_command=base_param['command']: frozen_command(b_index))
 
             else:
                 continue
@@ -139,8 +145,13 @@ class StrategyEditor(tk.Frame):
             temp_label.grid(row=row_nb, column=0)
 
             if param['widget'] == tk.Entry:
-                self._extra_input[code_name] = tk.Entry(self._popup_window, bg=BG_COLOR_2, justify=tk.CENTER, fg=FG_COLOR,
-                                      insertbackground=FG_COLOR)
+                self._extra_input[code_name] = tk.Entry(self._popup_window, bg=BG_COLOR_2, justify=tk.CENTER, fg=FG_COLOR, insertbackground=FG_COLOR)
+
+                if param['data_type'] == int:
+                    self._extra_input[code_name].config(validate='key', validatecommand=(self._valid_interger, "%P"))
+                elif param['data_type'] == float:
+                    self._extra_input[code_name].config(validate='key', validatecommand=(self._valid_float, "%P"))
+
                 if self._additional_parameters[b_index][code_name] is not None:
                     self._extra_input[code_name].insert(tk.END, str(self._additional_parameters[b_index][code_name]))
             else:
