@@ -28,7 +28,8 @@ class BitmexClient:
         self._public_key = public_key
         self._secrect_key = secrect_key
 
-        self._ws = None
+        self.ws: websocket.WebSocketApp
+        self.reconnect = True
 
         self.contracts = self.get_contracts()
         self.balance = self.get_balances()
@@ -39,7 +40,7 @@ class BitmexClient:
         self.logs = []
 
         t = threading.Thread(target=self._start_ws)
-        t.daemon = True
+        # t.daemon = True
         t.start()
 
         logger.info("Bitmex Client successfully initialized")
@@ -184,15 +185,18 @@ class BitmexClient:
                     return OrderStatus(order, "bitmex")
 
     def _start_ws(self):
-        self._ws = websocket.WebSocketApp(self._ws_url, on_open=self._on_open, on_close=self._on_close,
+        self.ws = websocket.WebSocketApp(self._ws_url, on_open=self._on_open, on_close=self._on_close,
                                           on_error=self._on_error, on_message=self._on_message)
 
         while True:
             try:
-                self._ws.run_forever()
+                if self.reconnect:
+                    self.ws.run_forever()
+                else:
+                    break
             except Exception as e:
-                logger.error("Bitmex error  in run_forever() method: %s", e)
-                time.sleep(2)
+                logger.error("Bitmex error in run_forever() method: %s", e)
+            time.sleep(2)
 
     def _on_open(self, ws):
         logger.info("Bitmex connection opened")
@@ -273,7 +277,7 @@ class BitmexClient:
         data['args'].append(topic)
 
         try:
-            self._ws.send(json.dumps(data))
+            self.ws.send(json.dumps(data))
         except Exception as e:
             logger.error("A websocket error while subscribing to %s: %s", topic, e)
 
