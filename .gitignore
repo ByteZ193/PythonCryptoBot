@@ -6,3 +6,5 @@ interface/__pycache__
 keys.txt
 keys.py
 start.bat
+database.db
+database.db-journal

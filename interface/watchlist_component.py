@@ -6,12 +6,14 @@ from models import *
 from interface.styling import *
 from interface.autocomplete_widget import Autocomplete
 from interface.scrollable_frame import ScrollableFrame
+from interface.database import WorkspaceData
 
 
 class Watchlist(tk.Frame):
-    def __init__(self, binance_contracts: typing.Dict[str, Contract], bitmex_contracts: typing.Dict[str, Contract], *args,
-                 **kwargs):
+    def __init__(self, binance_contracts: typing.Dict[str, Contract], bitmex_contracts: typing.Dict[str, Contract], *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.db = WorkspaceData()
 
         self.binance_symbols = list(binance_contracts.keys())
         self.bitmex_symbols = list(bitmex_contracts.keys())
@@ -64,6 +66,11 @@ class Watchlist(tk.Frame):
                 self.body_widgets[h + "_var"] = dict()
 
         self._body_index = 0
+
+        saved_symbols = self.db.get("watchlist")
+
+        for s in saved_symbols:
+            self._add_symbol(s['symbol'], s['exchange'])
 
     def _remove_symbol(self, b_index: int):
         for h in self._headers:
