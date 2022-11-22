@@ -213,7 +213,7 @@ class BinanceFuturesClient:
         # self.subscribe_channel(list(self.contracts.values()), "bookTicker")
         # self.subscribe_channel(list(self.contracts.values()), "aggTrade")
 
-    def _on_close(self, ws):
+    def _on_close(self, ws,n,z):
         logger.warning("Binance Websocket connection closed")
 
     def _on_error(self, ws, msg: str):
