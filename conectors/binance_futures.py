@@ -131,7 +131,7 @@ class BinanceFuturesClient:
 
         balances = dict()
 
-        account_data = self._make_requests("GET", "/fapi/v1/account", data)
+        account_data = self._make_requests("GET", "/fapi/v2/account", data)
 
         if account_data is not None:
             for a in account_data['assets']:
